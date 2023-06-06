@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "start": "nodemon --experimental-modules src/index.js --watch"
+  },
+  "dependencies": {
+    "nodemon": "^2.0.22",
+    "websocket": "^1.0.34",
+    "ws": "^8.13.0"
+  }
+}
