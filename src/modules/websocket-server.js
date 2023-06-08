@@ -1,8 +1,9 @@
 // Require Websocket server from library
-const WebSocketServer = require('ws');
+const MultipathServer = require('ws-multipath')
+
 class WebSocketServerModule{
 	constructor(port){
-		this.wss = new WebSocketServer.Server({port: port})
+		this.wss = new MultipathServer({port: port})
 	}
 }
 

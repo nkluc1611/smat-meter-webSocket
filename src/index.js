@@ -1,9 +1,15 @@
-const WebsocketServer = require('./modules/websocket-server')
-const WebSocketServerController = require('./controllers/websocket-server')
+const MultipathServer = require('ws-multipath');
+const WebSocketServerController = require('./controllers/WebsocketServerController');
 
-// Declare port websocket
+// Declare port
 const port = 8083
-// New Web Socket Server
-const websocket = new WebsocketServer(port)
-const wssControler = new WebSocketServerController(websocket.wss)
-wssControler.onConnection()
+
+// Create Web Socket Server listen port
+const server = new MultipathServer({ port: port });
+
+// Create sub path on Web Socket Srever
+const rt_data_socket = new WebSocketServerController(server, '/realtime-data')
+rt_data_socket.onConnection()
+
+const eny_now_socket = new WebSocketServerController(server, '/enegy')
+eny_now_socket.onConnection()
