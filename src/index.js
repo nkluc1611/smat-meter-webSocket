@@ -11,5 +11,5 @@ const server = new MultipathServer({ port: port });
 const rt_data_socket = new WebSocketServerController(server, '/realtime-data')
 rt_data_socket.onConnection()
 
-const eny_now_socket = new WebSocketServerController(server, '/enegy')
+const eny_now_socket = new WebSocketServerController(server, '/energy')
 eny_now_socket.onConnection()

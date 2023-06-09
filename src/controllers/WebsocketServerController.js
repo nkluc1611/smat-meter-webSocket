@@ -27,17 +27,15 @@ class WebSocketServerController{
 
         })
     }
-
-    publish(ws){
+    publish(ws) {
         // On message from client
-        ws.on("message", data => {
-            data = JSON.parse(data)
-            console.log(`${this.path} : ${data}`)
-            this.wss.clients.forEach(client => {
-                client.send(`${data}`)
-            });
+        ws.on("message", (data) => {
+          console.log(`${this.path} : ${data}`);
+          this.wss.clients.forEach((client) => {
+            client.send(data + "");
+          });
         });
-    }
+      }
 }
 
 module.exports = WebSocketServerController
