@@ -1,0 +1,129 @@
+<html>
+
+<head>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<style>
+  .container {
+    display: flex;
+  }
+</style>
+
+<body>
+  <div class="flex justify-between p-16">
+
+    <div class="w-6/12 mr-24">
+      <p>MQTT_RT_DATA</p>
+      <div class="border rounded-lg">
+        <div id="value" class="p-4"></div>
+      </div>
+    </div>
+    <div class="w-6/12">
+      <p>MQTT_ENY_NOW</p>
+      <canvas id="myChart" class="w-4/12"></canvas>
+    </div>
+  </div>
+</body>
+<script>
+  const ctx = document.getElementById('myChart');
+  let datasets = [];
+  const formatData = datasets.reduce((obj, item) => {
+    obj.zygsz.push(item.zygsz);
+    obj.fygsz.push(item.fygsz);
+    obj.label.push(moment(item.time).format('lll'))
+    return obj
+  }, {
+    zygsz: [],
+    fygsz: [],
+    label: []
+  })
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: formatData.label,
+      datasets: [{
+        label: '# of zygsz',
+        data: formatData.zygsz,
+        borderWidth: 1
+      }, {
+        label: '# of fygsz',
+        data: formatData.fygsz,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  const realtimeDataSocket = new WebSocket(
+    "ws://smart-meter-socket.gasable.com/realtime-data",
+  );
+  const socketValue = new WebSocket(
+    "ws://smart-meter-socket.gasable.com/enegy",
+  );
+
+  const getKeyName = (key) => {
+    switch (key) {
+      case 'id':
+        return 'Meter Id'
+      case 'zygsz':
+        return 'Import total active ennergy, float, unit kWh'
+      case 'fygsz':
+        return 'Export total active ennergy, float, unit kWh'
+      case 'zwgsz':
+        return 'Import total reactive ennergy, float, unit kWh'
+      case 'fwgsz':
+        return 'Export total reactive ennergy, float, unit kWh'
+      case 'time':
+        return 'Timestamp'
+      default:
+        return key
+    }
+  }
+  realtimeDataSocket.onmessage = (event) => {
+    if (event.data !== 'Connected!') {
+      const data = JSON.parse(event.data);
+      switch (data.topic) {
+        case 'MQTT_RT_DATA':
+          const valueBox = document.getElementById('value');
+          const metaData = Object.keys(data.payload).map(key => `<div class="flex items-center"> <p class=" bold">${getKeyName(key)}</p>: ${data.payload[key]}</div>`)
+          valueBox.innerHTML = metaData.join('')
+          break;
+
+        default:
+          break;
+      }
+    }
+  };
+
+  socketValue.onmessage = (event) => {
+    if (event.data !== 'Connected!') {
+      const data = JSON.parse(event.data);
+      switch (data.topic) {
+        case 'MQTT_ENY_NOW':
+          datasets.push(data.payload)
+          chart.data.labels.push(moment().format('lll'));
+          chart.data.datasets.forEach((dataset) => {
+            formatData.zygsz.push(data.payload.zygsz);
+            formatData.fygsz.push(data.payload.fygsz);
+          });
+          chart.update();
+          break;
+
+        default:
+          break;
+      }
+    }
+
+  }
+</script>
+
+</html>
