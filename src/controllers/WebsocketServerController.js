@@ -5,6 +5,7 @@ class WebSocketServerController{
         this.wss = server.createHandler({ path: path })
         this.path = path
     }
+    
 
     onConnection(){
         this.wss.on('connection', (ws) => {
@@ -25,17 +26,23 @@ class WebSocketServerController{
             // On message client
             this.publish(ws)
 
+            setInterval(() => {
+                this.wss.clients.forEach((client) => {
+                    client.ping()
+                })
+            }, 10000)
+
         })
     }
     publish(ws) {
         // On message from client
         ws.on("message", (data) => {
-          console.log(`${this.path} : ${data}`);
-          this.wss.clients.forEach((client) => {
-            client.send(data + "");
-          });
+            console.log(`${this.path} : ${data}`);
+            this.wss.clients.forEach((client) => {
+                client.send(data + "");
+            });
         });
-      }
+    }
 }
 
 module.exports = WebSocketServerController
