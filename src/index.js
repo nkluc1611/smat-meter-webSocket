@@ -13,3 +13,6 @@ rt_data_socket.onConnection()
 
 const eny_now_socket = new WebSocketServerController(server, '/energy')
 eny_now_socket.onConnection()
+
+const response_api_socket = new WebSocketServerController(server, '/api')
+response_api_socket.onConnection()
